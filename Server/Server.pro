@@ -1,7 +1,5 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    Server \
-    Client
-
-
+    QJsonRpcServer \
+    tests
