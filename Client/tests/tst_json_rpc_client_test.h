@@ -5,7 +5,7 @@
 
 using namespace testing;
 
-TEST(Json_RPC_Server, Json_RPC_Server_test)
+TEST(Json_RPC_Clent, Json_RPC_Client_test)
 {
     EXPECT_EQ(1, 1);
     ASSERT_THAT(0, Eq(0));

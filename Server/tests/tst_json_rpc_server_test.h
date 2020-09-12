@@ -5,6 +5,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QJsonRpcServer.h>
 #include <vector>
 
 using namespace testing;
@@ -12,14 +13,14 @@ using namespace testing;
 class JsonRpcTest : public ::testing::Test {
 
 protected:
-    JsonRpcServer* rpc;
+    QJsonRpcServer* rpc;
     // Test interface
 protected:
     virtual void SetUp() override
     {
         using namespace std::string_literals;
 
-        rpc = new JsonRpcServer();
+        rpc = new QJsonRpcServer();
 
         rpc->addMethod("subtract"s, {"subtrahend", "minuend"},
                        [](const QVariantList& args) -> QVariant {

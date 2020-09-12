@@ -1,4 +1,4 @@
-#include "tst_json_rpc_server_test.h"
+#include "tst_json_rpc_client_test.h"
 
 #include <gtest/gtest.h>
 
