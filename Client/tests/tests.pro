@@ -1,19 +1,16 @@
 
 GOOGLETEST_DIR = ../../googletest
-
 include(gtest_dependency.pri)
 
-
 TEMPLATE = app
-
-QT = core
-
+CONFIG += console
+CONFIG -= app_bundle
 CONFIG += thread
 
 
 
 HEADERS += \
-        tst_json_rpc_server_test.h
+        tst_json_rpc_client_test.h
 
 SOURCES += \
         main.cpp
