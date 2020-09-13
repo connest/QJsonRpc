@@ -6,6 +6,26 @@ QJsonRpcClient::QJsonRpcClient()
 
 }
 
+QJsonDocument QJsonRpcClient::execute(const std::vector<QJsonRpcClient::Request> &batchRequest)
+{
+    QJsonArray requests;
+    for(const auto& requestObject: batchRequest)
+    {
+        const QJsonDocument& requestDocument = execute(requestObject);
+        requests.append(requestDocument.object());
+    }
+
+    return QJsonDocument(requests);
+}
+
+QJsonDocument QJsonRpcClient::execute(const QJsonRpcClient::Request &request)
+{
+    if(request.m_params.isUndefined())
+        return execute(request.m_methodName, request.m_type);
+    else
+        return execute(request.m_methodName, request.m_params, request.m_type);
+}
+
 QJsonDocument QJsonRpcClient::execute(const std::string &methodName,
                                       const QJsonValue &params,
                                       QJsonRpcClient::MethodType type)
@@ -66,8 +86,11 @@ bool QJsonRpcClient::validate(const QJsonDocument &response)
 
     if(response.isArray())
     {
-        //TODO validate batch response
-        return false;
+        const std::vector<bool> validStates = validateBatch(response);
+        for(const auto& state: validStates)
+            if(!state)
+                return false;
+        return true;
     }
     else if(response.isObject())
     {
@@ -88,6 +111,35 @@ bool QJsonRpcClient::isError(const QJsonDocument &response)
         return isObjectError(response.object());
     }
     return false;
+}
+
+std::vector<bool> QJsonRpcClient::validateBatch(const QJsonDocument &response)
+{
+    const QJsonArray& responseArray = response.array();
+
+    //Default fill as falses
+    std::vector<bool> result;
+    result.reserve(responseArray.count());
+
+    for(const auto& responseObject: responseArray)
+    {
+        if(!responseObject.isObject())
+        {
+            result.push_back(false);
+        }
+        else
+        {
+            const bool validFlag = validateObject(responseObject.toObject());
+            result.push_back(validFlag);
+        }
+    }
+
+    return result;
+}
+
+bool QJsonRpcClient::isBatch(const QJsonDocument &response)
+{
+    return response.isArray();
 }
 
 bool QJsonRpcClient::validateObject(const QJsonObject &obj)
@@ -210,4 +262,22 @@ bool QJsonRpcClient::validateObject(const QJsonObject &obj)
 bool QJsonRpcClient::isObjectError(const QJsonObject &obj)
 {
     return obj.keys().contains("error");
+}
+
+
+
+QJsonRpcClient::Request::Request(const std::string &methodName, const QJsonValue &params, const QJsonRpcClient::MethodType type)
+    : m_methodName {methodName}
+    , m_params {params}
+    , m_type {type}
+{
+
+}
+
+QJsonRpcClient::Request::Request(const std::string &methodName, const QJsonRpcClient::MethodType type)
+    : m_methodName {methodName}
+    , m_params {QJsonValue::Undefined}
+    , m_type {type}
+{
+
 }
